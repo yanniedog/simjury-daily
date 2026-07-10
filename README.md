@@ -79,26 +79,27 @@ reaches players that a human hasn't read.
 ### Bot reviews
 
 - **Sourcery** auto-reviews every PR (installed org-wide).
-- **Codex** needs the GitHub App **plus** a one-time ChatGPT-side setup — the app
-  alone is not enough. When it's not fully wired, `@codex review` replies with
-  "To use Codex here, create a Codex account and connect…" instead of reviewing
-  (and on PR #1 it stayed silent entirely). The three operator steps, using the
-  exact links Codex returns:
+- **Codex** needs the GitHub App **plus** a one-time ChatGPT-side setup, and it
+  authenticates the *commenter*. Verified behaviour on PRs #2–#3:
+  - A `@codex review` posted by **`github-actions[bot]`** (i.e. from a workflow)
+    is **refused** — Codex replies "To use Codex here, create a Codex account and
+    connect…", because the bot identity has no connected Codex account. So there
+    is **no workflow** that auto-requests Codex; it would only add that noise.
+  - A `@codex review` from a **human** account whose Codex is connected **works**
+    — Codex reacts 👀 and posts a review.
+
+  One-time setup, using the exact links Codex returns:
   1. **Install the GitHub App** — *ChatGPT Codex Connector*
      (GitHub → Settings → GitHub Apps). ✅ Done (account-wide, "All repositories").
   2. **Connect GitHub to the Codex account** —
-     <https://chatgpt.com/codex/cloud/settings/connectors>
+     <https://chatgpt.com/codex/cloud/settings/connectors> ✅
   3. **Create a Codex environment for this repo** —
-     <https://chatgpt.com/codex/cloud/settings/environments>
-  4. **Enable Code review for the repo** —
+     <https://chatgpt.com/codex/cloud/settings/environments> ✅
+  4. **Enable Automatic reviews** (recommended, still to do) —
      <https://chatgpt.com/codex/settings/code-review> — turn on **Code review**
-     and **Automatic reviews** so every new PR is reviewed with no comment needed.
-
-  With Automatic reviews on, no workflow is required — Codex reviews every PR by
-  itself. The `pr-request-bot-reviews` workflow is a fallback that posts
-  `@codex review`; Codex *does* act on that bot-authored mention (verified on
-  PR #2), but Automatic reviews is the cleaner primary path. Manual on-demand
-  trigger: comment `@codex review` on any PR.
+     and **Automatic reviews** for `simjury-daily`. This reviews every new PR via
+     the app itself (no commenter needed), which is the only reliable hands-off
+     path. Until then, a human must comment `@codex review` on each PR.
 - **Gemini Code Assist** is optional; install its GitHub App on the repo if you
   want its reviews too.
 
