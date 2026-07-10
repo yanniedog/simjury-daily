@@ -70,11 +70,21 @@ reaches players that a human hasn't read.
 ### Bot reviews
 
 - **Sourcery** auto-reviews every PR (installed org-wide).
-- **Codex** only reviews when mentioned. The `pr-request-bot-reviews` workflow
-  posts `@codex review` automatically when a PR is opened / marked ready.
-  **Operator step (one-time):** install the *ChatGPT Codex Connector* GitHub App
-  on this repo (GitHub → Settings → GitHub Apps) and connect a Codex account, or
-  the mention is a no-op. Manual fallback: comment `@codex review` on any PR.
+- **Codex** needs *two* things wired up, and the GitHub App alone is not enough:
+  1. **GitHub App** — the *ChatGPT Codex Connector* must be installed on the repo
+     (GitHub → Settings → GitHub Apps). ✅ Done (account-wide, "All repositories").
+  2. **Code review enabled for this repo on the ChatGPT side** — this is the step
+     that was missing. Go to **<https://chatgpt.com/codex/settings/code-review>**,
+     find `simjury-daily`, and turn on **Code review**. Turn on **Automatic
+     reviews** too, so every new PR is reviewed with no comment needed. Until this
+     toggle is on, `@codex review` is silently a no-op even from a human account
+     (that is exactly what happened on PR #1).
+
+  With Automatic reviews on, no workflow is required — Codex reviews every PR by
+  itself. The `pr-request-bot-reviews` workflow is a best-effort fallback that
+  posts `@codex review`; note it comments as `github-actions[bot]`, and a
+  bot-authored mention may be ignored, so **Automatic reviews is the reliable
+  path**. Manual on-demand trigger: a human comments `@codex review` on the PR.
 - **Gemini Code Assist** is optional; install its GitHub App on the repo if you
   want its reviews too.
 
