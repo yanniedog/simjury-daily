@@ -18,9 +18,12 @@ human-cleared harness in the pilot repo — never through this pipeline.
 
 ## Status
 
-**M0 — scaffold.** Toolchain, CI, the deterministic day→case selector, the case
-schema + validator, and a placeholder shell. The playable loop (evidence beats,
-conviction slider, verdict, reveal, spoiler-safe share card) is M1.
+**M1 — playable loop.** The full daily loop is live: read the evidence beat by
+beat, move the conviction slider, deliver a verdict, then get the reveal (what
+each piece was *actually* worth) and a spoiler-safe share card. One play per
+day, persisted locally. Cases load from `cases/*.json`; `d-0001` is the first
+hand-authored fiction seed. Next: M2 (calibration / streaks) and M3 (the
+generation pipeline that fills the daily queue).
 
 ## Develop
 
@@ -40,13 +43,19 @@ Node ≥ 20.
 
 ```text
 src/
-  App.tsx            # scaffold shell (M1 replaces this with the loop)
+  App.tsx            # phase state machine: intro -> beats -> verdict -> reveal
+  components/        # IntroCard, BeatView, ConvictionSlider, VerdictView,
+                     #   RevealView, ShareCard
   lib/
-    daily.ts         # deterministic date -> case selection (Wordle-style)
+    daily.ts         # deterministic date -> day index (Wordle-style)
+    cases.ts         # bundles + validates cases/, picks the day's case
     caseSchema.ts    # zod schema + the fiction-only invariant
+    game.ts          # pure scoring: conviction bands + trap analysis
+    share.ts         # spoiler-safe share-text builder
+    storage.ts       # one-play-per-day persistence (localStorage)
 scripts/
   validate-cases.ts  # CI gate over cases/
-cases/               # the daily case queue (JSON); d-0001 is a scaffold sample
+cases/               # the daily case queue (JSON); d-0001 is the seed case
 docs/
   COST-GUARDRAILS.md # how hosting stays on the free tier
 .github/workflows/
