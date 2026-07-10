@@ -70,21 +70,26 @@ reaches players that a human hasn't read.
 ### Bot reviews
 
 - **Sourcery** auto-reviews every PR (installed org-wide).
-- **Codex** needs *two* things wired up, and the GitHub App alone is not enough:
-  1. **GitHub App** — the *ChatGPT Codex Connector* must be installed on the repo
+- **Codex** needs the GitHub App **plus** a one-time ChatGPT-side setup — the app
+  alone is not enough. When it's not fully wired, `@codex review` replies with
+  "To use Codex here, create a Codex account and connect…" instead of reviewing
+  (and on PR #1 it stayed silent entirely). The three operator steps, using the
+  exact links Codex returns:
+  1. **Install the GitHub App** — *ChatGPT Codex Connector*
      (GitHub → Settings → GitHub Apps). ✅ Done (account-wide, "All repositories").
-  2. **Code review enabled for this repo on the ChatGPT side** — this is the step
-     that was missing. Go to **<https://chatgpt.com/codex/settings/code-review>**,
-     find `simjury-daily`, and turn on **Code review**. Turn on **Automatic
-     reviews** too, so every new PR is reviewed with no comment needed. Until this
-     toggle is on, `@codex review` is silently a no-op even from a human account
-     (that is exactly what happened on PR #1).
+  2. **Connect GitHub to the Codex account** —
+     <https://chatgpt.com/codex/cloud/settings/connectors>
+  3. **Create a Codex environment for this repo** —
+     <https://chatgpt.com/codex/cloud/settings/environments>
+  4. **Enable Code review for the repo** —
+     <https://chatgpt.com/codex/settings/code-review> — turn on **Code review**
+     and **Automatic reviews** so every new PR is reviewed with no comment needed.
 
   With Automatic reviews on, no workflow is required — Codex reviews every PR by
-  itself. The `pr-request-bot-reviews` workflow is a best-effort fallback that
-  posts `@codex review`; note it comments as `github-actions[bot]`, and a
-  bot-authored mention may be ignored, so **Automatic reviews is the reliable
-  path**. Manual on-demand trigger: a human comments `@codex review` on the PR.
+  itself. The `pr-request-bot-reviews` workflow is a fallback that posts
+  `@codex review`; Codex *does* act on that bot-authored mention (verified on
+  PR #2), but Automatic reviews is the cleaner primary path. Manual on-demand
+  trigger: comment `@codex review` on any PR.
 - **Gemini Code Assist** is optional; install its GitHub App on the repo if you
   want its reviews too.
 

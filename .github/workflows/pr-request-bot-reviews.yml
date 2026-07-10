@@ -6,11 +6,12 @@ name: pr-request-bot-reviews
 # https://chatgpt.com/codex/settings/code-review — with that on, Codex reviews
 # every PR by itself and this workflow is redundant.
 #
-# Caveat: the comment below is authored by github-actions[bot]. A bot-authored
-# "@codex review" mention may be ignored by Codex, so do not rely on this alone.
-# Also requires: (1) the ChatGPT Codex Connector GitHub App installed on the repo
-# AND (2) Code review enabled for the repo in Codex settings. See README
-# "Bot reviews".
+# Note: the comment below is authored by github-actions[bot]. Codex does act on
+# that bot-authored "@codex review" (verified on PR #2), so this works as a
+# trigger — but it still requires the full Codex setup to be complete:
+# (1) the ChatGPT Codex Connector GitHub App installed on the repo, (2) GitHub
+# connected + an environment created for the repo, and (3) Code review enabled
+# for the repo in Codex settings. See README "Bot reviews".
 
 on:
   pull_request:
