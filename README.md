@@ -38,7 +38,7 @@ Node ≥ 20.
 
 ## Layout
 
-```
+```text
 src/
   App.tsx            # scaffold shell (M1 replaces this with the loop)
   lib/
@@ -66,6 +66,17 @@ any Cloudflare feature.
 Every change is a PR; CI (lint · typecheck · test · validate:cases · build)
 must be green before merge. Content lands as reviewed PRs of case JSON — nothing
 reaches players that a human hasn't read.
+
+### Bot reviews
+
+- **Sourcery** auto-reviews every PR (installed org-wide).
+- **Codex** only reviews when mentioned. The `pr-request-bot-reviews` workflow
+  posts `@codex review` automatically when a PR is opened / marked ready.
+  **Operator step (one-time):** install the *ChatGPT Codex Connector* GitHub App
+  on this repo (GitHub → Settings → GitHub Apps) and connect a Codex account, or
+  the mention is a no-op. Manual fallback: comment `@codex review` on any PR.
+- **Gemini Code Assist** is optional; install its GitHub App on the repo if you
+  want its reviews too.
 
 ---
 
