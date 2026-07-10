@@ -1,9 +1,17 @@
 name: pr-request-bot-reviews
 
-# Ensures Codex is asked to review every PR. Sourcery auto-reviews; Codex only
-# reviews when mentioned, so we post "@codex review" once when a PR becomes
-# ready. Requires the ChatGPT Codex Connector GitHub App to be installed on this
-# repository (a one-time operator step — see README "Bot reviews").
+# Best-effort request for a Codex review on every PR. This is a FALLBACK only.
+#
+# The reliable path is Codex "Automatic reviews", enabled per-repo at
+# https://chatgpt.com/codex/settings/code-review — with that on, Codex reviews
+# every PR by itself and this workflow is redundant.
+#
+# Note: the comment below is authored by github-actions[bot]. Codex does act on
+# that bot-authored "@codex review" (verified on PR #2), so this works as a
+# trigger — but it still requires the full Codex setup to be complete:
+# (1) the ChatGPT Codex Connector GitHub App installed on the repo, (2) GitHub
+# connected + an environment created for the repo, and (3) Code review enabled
+# for the repo in Codex settings. See README "Bot reviews".
 
 on:
   pull_request:
