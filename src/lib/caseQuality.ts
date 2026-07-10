@@ -20,6 +20,8 @@ type Verdict = TrialCase['verdict_truth']
 export const MISLEAD_MIN_GAP = 0.25
 /** A decisive beat must carry at least this much true weight. */
 export const DECISIVE_MIN_WEIGHT = 0.6
+/** Tolerance so floating-point subtraction can't reject a case that is exactly on a threshold. */
+const EPSILON = 1e-9
 
 export interface QualityIssue {
   caseId: string
@@ -51,7 +53,7 @@ export function checkCase(c: TrialCase): string[] {
   }
 
   for (const b of misleading) {
-    if (b.surface_persuasion - b.true_weight < MISLEAD_MIN_GAP) {
+    if (b.surface_persuasion - b.true_weight < MISLEAD_MIN_GAP - EPSILON) {
       issues.push(
         `misleading beat ${b.id} must feel more persuasive than it is worth ` +
           `(surface_persuasion - true_weight >= ${MISLEAD_MIN_GAP})`,
@@ -59,10 +61,20 @@ export function checkCase(c: TrialCase): string[] {
     }
   }
   for (const b of decisive) {
-    if (b.true_weight < DECISIVE_MIN_WEIGHT) {
+    if (b.true_weight < DECISIVE_MIN_WEIGHT - EPSILON) {
       issues.push(
         `decisive beat ${b.id} must carry real weight ` +
           `(true_weight >= ${DECISIVE_MIN_WEIGHT})`,
+      )
+    }
+  }
+  // A `minor` beat is context, not a signal — it must not secretly carry
+  // decisive weight, or its stamp is a lie (a real risk in generated cases).
+  for (const b of c.beats.filter((x) => x.reveal_stamp === 'minor')) {
+    if (b.true_weight >= DECISIVE_MIN_WEIGHT) {
+      issues.push(
+        `minor beat ${b.id} must not carry decisive weight ` +
+          `(true_weight < ${DECISIVE_MIN_WEIGHT})`,
       )
     }
   }

@@ -66,6 +66,27 @@ describe('checkCase', () => {
     expect(checkCase(c).join()).toMatch(/more persuasive than it is worth/)
   })
 
+  it('accepts a trap whose gap is exactly the threshold despite float error', () => {
+    // 0.33 - 0.08 === 0.24999999999999997 in JS; the epsilon must not reject it.
+    const c = make({
+      beats: make().beats.map((b) =>
+        b.reveal_stamp === 'misleading'
+          ? { ...b, surface_persuasion: 0.33, true_weight: 0.08 }
+          : b,
+      ),
+    })
+    expect(checkCase(c).join()).not.toMatch(/more persuasive than it is worth/)
+  })
+
+  it('flags a minor beat that secretly carries decisive weight', () => {
+    const c = make({
+      beats: make().beats.map((b) =>
+        b.reveal_stamp === 'minor' ? { ...b, true_weight: 0.8 } : b,
+      ),
+    })
+    expect(checkCase(c).join()).toMatch(/minor beat .* must not carry decisive weight/)
+  })
+
   it('flags a weak decisive beat', () => {
     const c = make({
       beats: make().beats.map((b) =>
