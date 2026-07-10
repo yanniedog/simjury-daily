@@ -18,12 +18,14 @@ human-cleared harness in the pilot repo — never through this pipeline.
 
 ## Status
 
-**M1 — playable loop.** The full daily loop is live: read the evidence beat by
-beat, move the conviction slider, deliver a verdict, then get the reveal (what
-each piece was *actually* worth) and a spoiler-safe share card. One play per
-day, persisted locally. Cases load from `cases/*.json`; `d-0001` is the first
-hand-authored fiction seed. Next: M2 (calibration / streaks) and M3 (the
-generation pipeline that fills the daily queue).
+**M3 — the case pipeline.** On top of the M1 playable loop (evidence beats →
+conviction slider → verdict → reveal → spoiler-safe share, persisted one play
+per day), the daily queue now holds **five distinct hand-authored fiction
+cases** — a no-repeat work-week — behind a **design-quality gate** that enforces
+the puzzle rules in CI (every case has a trap, a real signal, argues both sides,
+and is solvable), plus a generation spec
+([docs/CASE-GENERATION.md](docs/CASE-GENERATION.md)) so the queue keeps growing.
+Next: M2 (streaks / calibration) and further case batches.
 
 ## Develop
 
@@ -50,13 +52,15 @@ src/
     daily.ts         # deterministic date -> day index (Wordle-style)
     cases.ts         # bundles + validates cases/, picks the day's case
     caseSchema.ts    # zod schema + the fiction-only invariant
+    caseQuality.ts   # design-quality gate: traps, real signals, solvability
     game.ts          # pure scoring: conviction bands + trap analysis
     share.ts         # spoiler-safe share-text builder
     storage.ts       # one-play-per-day persistence (localStorage)
 scripts/
-  validate-cases.ts  # CI gate over cases/
-cases/               # the daily case queue (JSON); d-0001 is the seed case
+  validate-cases.ts  # CI gate: schema + quality gate over cases/
+cases/               # the daily case queue (JSON); d-0001..d-0005 so far
 docs/
+  CASE-GENERATION.md # how a new case is made (recipe + rules)
   COST-GUARDRAILS.md # how hosting stays on the free tier
 .github/workflows/
   ci.yml             # lint, typecheck, test, validate:cases, build
