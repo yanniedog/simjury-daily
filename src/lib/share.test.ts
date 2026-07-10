@@ -43,4 +43,12 @@ describe('buildShareText', () => {
     const text = buildShareText({ ...base, totalTraps: 0, swayedByTraps: 0 })
     expect(text).not.toContain('🃏')
   })
+
+  it('brags a streak of 2+ but stays quiet below that', () => {
+    expect(buildShareText({ ...base, currentStreak: 3 })).toContain(
+      '🔥 3-day streak',
+    )
+    expect(buildShareText({ ...base, currentStreak: 1 })).not.toContain('🔥')
+    expect(buildShareText(base)).not.toContain('🔥')
+  })
 })

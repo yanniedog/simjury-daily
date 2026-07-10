@@ -2,7 +2,8 @@ import { type ReactNode, useLayoutEffect, useMemo, useState } from 'react'
 import { caseForDate } from './lib/cases'
 import { dayIndex } from './lib/daily'
 import { START_CONVICTION, analyzePlay, type Phase, type Verdict } from './lib/game'
-import { loadPlay, savePlay } from './lib/storage'
+import { loadAllPlays, loadPlay, savePlay } from './lib/storage'
+import { computeStats, type DayResult } from './lib/stats'
 import { IntroCard } from './components/IntroCard'
 import { BeatView } from './components/BeatView'
 import { VerdictView } from './components/VerdictView'
@@ -62,8 +63,19 @@ export default function App() {
     )
   }
 
+  const activeTrial = trial
   const dayNumber = day + 1
   const currentBeat = Math.min(convictions.length, beatCount - 1)
+
+  function stats() {
+    const results: DayResult[] = []
+    for (const play of loadAllPlays()) {
+      if (play.correct !== undefined) {
+        results.push({ day: play.day, correct: play.correct })
+      }
+    }
+    return computeStats(results)
+  }
 
   function begin() {
     setConvictions([])
@@ -80,8 +92,16 @@ export default function App() {
   }
 
   function chooseVerdict(chosen: Verdict) {
+    const analysis = analyzePlay(activeTrial, convictions, chosen)
     setVerdict(chosen)
-    savePlay({ day, convictions, verdict: chosen })
+    savePlay({
+      day,
+      convictions,
+      verdict: chosen,
+      correct: analysis.correct,
+      swayedByTraps: analysis.swayedByTraps,
+      totalTraps: analysis.totalTraps,
+    })
     setPhase('reveal')
   }
 
@@ -112,6 +132,7 @@ export default function App() {
           analysis={analyzePlay(trial, convictions, verdict)}
           verdict={verdict}
           dayNumber={dayNumber}
+          stats={stats()}
         />
       )}
     </Shell>

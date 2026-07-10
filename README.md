@@ -25,7 +25,9 @@ cases** — a no-repeat work-week — behind a **design-quality gate** that enfo
 the puzzle rules in CI (every case has a trap, a real signal, argues both sides,
 and is solvable), plus a generation spec
 ([docs/CASE-GENERATION.md](docs/CASE-GENERATION.md)) so the queue keeps growing.
-Next: M2 (streaks / calibration) and further case batches.
+**M2** adds the retention half: cross-day **streaks, win rate, and best streak**
+(persisted locally, shown at the reveal and folded into the share card). Next:
+more case batches and a live deploy.
 
 ## Develop
 
