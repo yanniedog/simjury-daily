@@ -1,4 +1,4 @@
-import { type ReactNode, useMemo, useState } from 'react'
+import { type ReactNode, useLayoutEffect, useMemo, useState } from 'react'
 import { caseForDate } from './lib/cases'
 import { dayIndex } from './lib/daily'
 import { START_CONVICTION, analyzePlay, type Phase, type Verdict } from './lib/game'
@@ -22,13 +22,32 @@ export default function App() {
   const trial = useMemo(() => caseForDate(today), [today])
   const stored = useMemo(() => loadPlay(day), [day])
 
-  const [phase, setPhase] = useState<Phase>(stored ? 'reveal' : 'intro')
-  const [beatIndex, setBeatIndex] = useState(0)
+  // Only restore a completed play whose length matches today's case; otherwise
+  // it can't be scored cleanly, so we start fresh.
+  const validStored = useMemo(() => {
+    if (!stored || !trial) return null
+    return stored.convictions.length === trial.beats.length ? stored : null
+  }, [stored, trial])
+
+  const beatCount = trial ? trial.beats.length : 0
+
+  const [phase, setPhase] = useState<Phase>(validStored ? 'reveal' : 'intro')
   const [convictions, setConvictions] = useState<number[]>(
-    stored?.convictions ?? [],
+    validStored?.convictions ?? [],
   )
   const [conviction, setConviction] = useState(START_CONVICTION)
-  const [verdict, setVerdict] = useState<Verdict | null>(stored?.verdict ?? null)
+  const [verdict, setVerdict] = useState<Verdict | null>(
+    validStored?.verdict ?? null,
+  )
+
+  // Once every beat has a recorded conviction, move to the verdict. Deriving the
+  // current beat from convictions.length (rather than a second index state)
+  // removes any stale-closure risk on rapid submissions.
+  useLayoutEffect(() => {
+    if (phase === 'beats' && beatCount > 0 && convictions.length >= beatCount) {
+      setPhase('verdict')
+    }
+  }, [phase, convictions, beatCount])
 
   if (!trial) {
     return (
@@ -44,23 +63,20 @@ export default function App() {
   }
 
   const dayNumber = day + 1
-  const beatCount = trial.beats.length
+  const currentBeat = Math.min(convictions.length, beatCount - 1)
 
   function begin() {
     setConvictions([])
-    setBeatIndex(0)
     setConviction(START_CONVICTION)
     setPhase('beats')
   }
 
   function submitBeat() {
-    setConvictions((prev) => [...prev, conviction])
-    if (beatIndex + 1 < beatCount) {
-      setBeatIndex(beatIndex + 1)
-      // conviction carries over as the running belief into the next beat
-    } else {
-      setPhase('verdict')
-    }
+    // Guarded append: a double-fire can't push past the last beat.
+    setConvictions((prev) =>
+      prev.length >= beatCount ? prev : [...prev, conviction],
+    )
+    // conviction carries over as the running belief into the next beat.
   }
 
   function chooseVerdict(chosen: Verdict) {
@@ -77,7 +93,7 @@ export default function App() {
       {phase === 'beats' && (
         <BeatView
           trial={trial}
-          beatIndex={beatIndex}
+          beatIndex={currentBeat}
           value={conviction}
           onChange={setConviction}
           onSubmit={submitBeat}

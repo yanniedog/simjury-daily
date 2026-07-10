@@ -1,15 +1,17 @@
-import type { Verdict } from './game'
+import { z } from 'zod'
 
 /**
  * A finished day's play, persisted so a refresh (or coming back later the same
  * day) shows the result instead of letting the juror re-run the case — the
  * one-verdict-a-day rule that makes it a daily.
  */
-export interface StoredPlay {
-  day: number
-  convictions: number[]
-  verdict: Verdict
-}
+const storedPlaySchema = z.object({
+  day: z.number(),
+  convictions: z.array(z.number()),
+  verdict: z.enum(['Guilty', 'Not Guilty']),
+})
+
+export type StoredPlay = z.infer<typeof storedPlaySchema>
 
 const KEY_PREFIX = 'simjury-daily:v1:'
 
@@ -28,8 +30,10 @@ export function loadPlay(day: number): StoredPlay | null {
   try {
     const raw = store.getItem(KEY_PREFIX + day)
     if (!raw) return null
-    const parsed = JSON.parse(raw) as StoredPlay
-    return parsed.day === day ? parsed : null
+    // Validate the shape: a schema change or corrupted entry must not crash the
+    // game — a failed parse just means "not played today", so we start fresh.
+    const parsed = storedPlaySchema.safeParse(JSON.parse(raw))
+    return parsed.success && parsed.data.day === day ? parsed.data : null
   } catch {
     return null
   }

@@ -59,8 +59,10 @@ export function analyzePlay(
   verdict: Verdict,
 ): PlayAnalysis {
   const outcomes: BeatOutcome[] = trial.beats.map((beat, i) => {
-    const before = i === 0 ? START_CONVICTION : convictions[i - 1]
-    const after = convictions[i]
+    // Fall back to the running value if a conviction is missing, so a truncated
+    // array can never produce NaN comparisons downstream.
+    const before = i === 0 ? START_CONVICTION : convictions[i - 1] ?? START_CONVICTION
+    const after = convictions[i] ?? before
     const tookBait =
       beat.reveal_stamp === 'misleading' &&
       movedToward(beat.direction, before, after)
