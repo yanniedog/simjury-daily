@@ -68,11 +68,12 @@ docs/
 
 ## Deploy
 
-Hosting is **Cloudflare Pages, free tier, static only.** Deployment is done once
-via the Cloudflare dashboard (connect this GitHub repo; build command
-`npm run build`, output `dist/`) — no secrets in CI, no server, nothing
-billable. See [docs/COST-GUARDRAILS.md](docs/COST-GUARDRAILS.md) before enabling
-any Cloudflare feature.
+Hosting is **Cloudflare Pages, free tier, static only** — no server, nothing
+billable. Two paths, in [DEPLOY.md](DEPLOY.md): **dashboard connect** (Cloudflare
+builds on every push, no credentials in the repo) or **wrangler CLI**
+(`npm run deploy`, token-based, config in [wrangler.jsonc](wrangler.jsonc)). See
+[docs/COST-GUARDRAILS.md](docs/COST-GUARDRAILS.md) before enabling any Cloudflare
+feature.
 
 ## Process
 
