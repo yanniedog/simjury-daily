@@ -16,8 +16,17 @@ function main(): void {
   let files: string[]
   try {
     files = readdirSync(CASES_DIR).filter((f) => f.endsWith('.json'))
-  } catch {
-    console.log('No cases/ directory — nothing to validate.')
+  } catch (e) {
+    // cases/ is a committed part of the repo. Its absence means a broken
+    // checkout or a bad refactor, not an empty queue — fail loudly rather
+    // than pass silently.
+    console.error(`cases/ not found at ${CASES_DIR}; it must exist in the repo. (${(e as Error).message})`)
+    process.exit(1)
+  }
+
+  if (files.length === 0) {
+    // An empty-but-present directory is a legitimate pre-content state.
+    console.warn('cases/ has no .json cases yet — nothing to validate.')
     return
   }
 
