@@ -1,12 +1,15 @@
 /**
  * CI gate for the case queue. Validates every JSON file in cases/ against the
- * schema and rejects duplicate ids or publish dates. Exits non-zero on any
- * problem so a bad case can never reach the queue. Safe to run with no cases/.
+ * schema, then runs the design-quality gate over the whole queue (traps, real
+ * signals, solvability, uniqueness, verdict variety). Exits non-zero on any
+ * problem so a badly formed *or* badly designed case can never reach the queue.
+ * Safe to run with no cases/.
  */
 import { readdirSync, readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { caseSchema } from '../src/lib/caseSchema'
+import { caseSchema, type TrialCase } from '../src/lib/caseSchema'
+import { checkQueue } from '../src/lib/caseQuality'
 
 // Resolve relative to this script, not the process cwd, so it works the same
 // from CI (repo root) and from anywhere locally.
@@ -31,8 +34,7 @@ function main(): void {
   }
 
   const errors: string[] = []
-  const seenIds = new Set<string>()
-  const seenDates = new Set<string>()
+  const parsed: TrialCase[] = []
 
   for (const file of files.sort()) {
     let json: unknown
@@ -52,11 +54,15 @@ function main(): void {
       continue
     }
 
-    const c = result.data
-    if (seenIds.has(c.id)) errors.push(`${file}: duplicate id ${c.id}`)
-    if (seenDates.has(c.publish_date)) errors.push(`${file}: duplicate publish_date ${c.publish_date}`)
-    seenIds.add(c.id)
-    seenDates.add(c.publish_date)
+    parsed.push(result.data)
+  }
+
+  // Design-quality + integrity gate over the whole queue (uniqueness, traps,
+  // solvability, verdict variety). Only run once every file is schema-valid.
+  if (errors.length === 0) {
+    for (const issue of checkQueue(parsed)) {
+      errors.push(`${issue.caseId}: ${issue.message}`)
+    }
   }
 
   if (errors.length > 0) {
