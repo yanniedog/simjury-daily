@@ -1,0 +1,60 @@
+{
+  "id": "d-0001",
+  "publish_date": "2026-01-01",
+  "label": "fiction",
+  "title": "Scaffold Sample — not for launch",
+  "era": "placeholder",
+  "charge": "Placeholder charge used only to exercise the validator",
+  "elements": ["Placeholder element one", "Placeholder element two"],
+  "beats": [
+    {
+      "id": "b1",
+      "kind": "witness",
+      "text": "A confident but placeholder witness statement.",
+      "surface_persuasion": 0.8,
+      "true_weight": 0.2,
+      "direction": "guilt",
+      "reveal_stamp": "misleading",
+      "reveal_note": "The trap beat: it feels decisive, it is not."
+    },
+    {
+      "id": "b2",
+      "kind": "exhibit",
+      "text": "A quiet document that actually matters.",
+      "surface_persuasion": 0.4,
+      "true_weight": 0.8,
+      "direction": "innocence",
+      "reveal_stamp": "decisive",
+      "reveal_note": "The real signal, easy to under-weight."
+    },
+    {
+      "id": "b3",
+      "kind": "direction",
+      "text": "The judge's placeholder instruction on the burden of proof.",
+      "surface_persuasion": 0.3,
+      "true_weight": 0.3,
+      "direction": "innocence",
+      "reveal_stamp": "minor",
+      "reveal_note": "Context, not a pivot."
+    },
+    {
+      "id": "b4",
+      "kind": "witness",
+      "text": "A second placeholder witness who fills in the timeline.",
+      "surface_persuasion": 0.5,
+      "true_weight": 0.6,
+      "direction": "innocence",
+      "reveal_stamp": "decisive",
+      "reveal_note": "Corroborates the quiet exhibit."
+    }
+  ],
+  "verdict_truth": "Not Guilty",
+  "twist": "Placeholder reveal. Real cases arrive via the M3 pipeline; this file only proves the validator works.",
+  "difficulty_target": 0.6,
+  "gen_meta": {
+    "model": "scaffold",
+    "prompt_version": "0",
+    "reviewer": "scaffold",
+    "batch_pr": "M0"
+  }
+}
