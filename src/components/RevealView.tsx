@@ -1,7 +1,9 @@
 import type { TrialCase } from '../lib/caseSchema'
 import type { BeatOutcome, PlayAnalysis, Verdict } from '../lib/game'
+import type { Stats } from '../lib/stats'
 import { buildShareText } from '../lib/share'
 import { ShareCard } from './ShareCard'
+import { StatsPanel } from './StatsPanel'
 
 const STAMP = {
   decisive: { label: 'Decisive', cls: 'border-emerald-700 text-emerald-300' },
@@ -86,11 +88,13 @@ export function RevealView({
   analysis,
   verdict,
   dayNumber,
+  stats,
 }: {
   trial: TrialCase
   analysis: PlayAnalysis
   verdict: Verdict
   dayNumber: number
+  stats: Stats
 }) {
   const shareText = buildShareText({
     dayNumber,
@@ -98,6 +102,7 @@ export function RevealView({
     correct: analysis.correct,
     swayedByTraps: analysis.swayedByTraps,
     totalTraps: analysis.totalTraps,
+    currentStreak: stats.currentStreak,
   })
 
   return (
@@ -123,6 +128,8 @@ export function RevealView({
           </p>
         )}
       </div>
+
+      <StatsPanel stats={stats} />
 
       <p className="text-sm leading-relaxed text-neutral-300">{trial.twist}</p>
 

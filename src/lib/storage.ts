@@ -4,11 +4,18 @@ import { z } from 'zod'
  * A finished day's play, persisted so a refresh (or coming back later the same
  * day) shows the result instead of letting the juror re-run the case — the
  * one-verdict-a-day rule that makes it a daily.
+ *
+ * `correct` and the trap counts are recorded so cross-day stats (streaks, win
+ * rate) can be computed without re-deriving them from each day's case. They are
+ * optional for backward compatibility with plays saved before stats existed.
  */
 const storedPlaySchema = z.object({
   day: z.number(),
   convictions: z.array(z.number()),
   verdict: z.enum(['Guilty', 'Not Guilty']),
+  correct: z.boolean().optional(),
+  swayedByTraps: z.number().optional(),
+  totalTraps: z.number().optional(),
 })
 
 export type StoredPlay = z.infer<typeof storedPlaySchema>
@@ -47,4 +54,24 @@ export function savePlay(play: StoredPlay): void {
   } catch {
     // Full/blocked storage is non-fatal; the play just won't persist.
   }
+}
+
+/** Every valid stored play, in no particular order. Corrupt entries are skipped. */
+export function loadAllPlays(): StoredPlay[] {
+  const store = storage()
+  if (!store) return []
+  const plays: StoredPlay[] = []
+  for (let i = 0; i < store.length; i++) {
+    const key = store.key(i)
+    if (!key || !key.startsWith(KEY_PREFIX)) continue
+    try {
+      const raw = store.getItem(key)
+      if (!raw) continue
+      const parsed = storedPlaySchema.safeParse(JSON.parse(raw))
+      if (parsed.success) plays.push(parsed.data)
+    } catch {
+      // Skip a corrupt entry rather than failing the whole stats read.
+    }
+  }
+  return plays
 }

@@ -14,6 +14,8 @@ export interface ShareInput {
   correct: boolean
   swayedByTraps: number
   totalTraps: number
+  /** Current correct-day streak; shown only when it's worth bragging about (>= 2). */
+  currentStreak?: number
 }
 
 /** One emoji tile for a conviction value — the journey's shape, not its content. */
@@ -45,6 +47,10 @@ export function buildShareText(
   if (input.totalTraps > 0) {
     const dodged = input.totalTraps - input.swayedByTraps
     lines.push(`🃏 ${dodged}/${input.totalTraps} traps dodged`)
+  }
+
+  if (input.currentStreak !== undefined && input.currentStreak >= 2) {
+    lines.push(`🔥 ${input.currentStreak}-day streak`)
   }
 
   lines.push(`Could you catch it? ${url}`)

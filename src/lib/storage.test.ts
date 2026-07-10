@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { loadPlay, savePlay } from './storage'
+import { loadAllPlays, loadPlay, savePlay } from './storage'
 
 function memoryStorage() {
   const m = new Map<string, string>()
@@ -51,5 +51,34 @@ describe('storage', () => {
     )
     vi.stubGlobal('localStorage', store)
     expect(loadPlay(5)).toBeNull()
+  })
+
+  it('round-trips the correctness and trap fields', () => {
+    vi.stubGlobal('localStorage', memoryStorage())
+    savePlay({
+      day: 5,
+      convictions: [70],
+      verdict: 'Guilty',
+      correct: true,
+      swayedByTraps: 1,
+      totalTraps: 2,
+    })
+    expect(loadPlay(5)?.correct).toBe(true)
+    expect(loadPlay(5)?.swayedByTraps).toBe(1)
+  })
+})
+
+describe('loadAllPlays', () => {
+  it('returns every valid play and skips corrupt entries', () => {
+    const store = memoryStorage()
+    vi.stubGlobal('localStorage', store)
+    savePlay({ day: 1, convictions: [50], verdict: 'Guilty', correct: true })
+    savePlay({ day: 2, convictions: [40], verdict: 'Not Guilty', correct: false })
+    store.setItem('simjury-daily:v1:3', '{ corrupt')
+    store.setItem('unrelated-key', 'ignored')
+
+    const all = loadAllPlays()
+    expect(all).toHaveLength(2)
+    expect(all.map((p) => p.day).sort()).toEqual([1, 2])
   })
 })

@@ -2,7 +2,8 @@ import { type ReactNode, useLayoutEffect, useMemo, useState } from 'react'
 import { caseForDate } from './lib/cases'
 import { dayIndex } from './lib/daily'
 import { START_CONVICTION, analyzePlay, type Phase, type Verdict } from './lib/game'
-import { loadPlay, savePlay } from './lib/storage'
+import { loadAllPlays, loadPlay, savePlay } from './lib/storage'
+import { computeStats, type DayResult, type Stats } from './lib/stats'
 import { IntroCard } from './components/IntroCard'
 import { BeatView } from './components/BeatView'
 import { VerdictView } from './components/VerdictView'
@@ -14,6 +15,17 @@ function Shell({ children }: { children: ReactNode }) {
       <div className="mx-auto w-full max-w-md">{children}</div>
     </main>
   )
+}
+
+/** Read the full play history from storage and reduce it to stats. */
+function statsFromStorage(): Stats {
+  const results: DayResult[] = []
+  for (const play of loadAllPlays()) {
+    if (play.correct !== undefined) {
+      results.push({ day: play.day, correct: play.correct })
+    }
+  }
+  return computeStats(results)
 }
 
 export default function App() {
@@ -39,6 +51,16 @@ export default function App() {
   const [verdict, setVerdict] = useState<Verdict | null>(
     validStored?.verdict ?? null,
   )
+  // Computed once when a play completes (or on restore), never per render.
+  const [revealStats, setRevealStats] = useState<Stats | null>(() =>
+    validStored ? statsFromStorage() : null,
+  )
+
+  // Play analysis for the reveal, memoized so it isn't recomputed every render.
+  const revealAnalysis = useMemo(
+    () => (trial && verdict ? analyzePlay(trial, convictions, verdict) : null),
+    [trial, convictions, verdict],
+  )
 
   // Once every beat has a recorded conviction, move to the verdict. Deriving the
   // current beat from convictions.length (rather than a second index state)
@@ -62,6 +84,7 @@ export default function App() {
     )
   }
 
+  const activeTrial = trial
   const dayNumber = day + 1
   const currentBeat = Math.min(convictions.length, beatCount - 1)
 
@@ -80,8 +103,17 @@ export default function App() {
   }
 
   function chooseVerdict(chosen: Verdict) {
+    const analysis = analyzePlay(activeTrial, convictions, chosen)
     setVerdict(chosen)
-    savePlay({ day, convictions, verdict: chosen })
+    savePlay({
+      day,
+      convictions,
+      verdict: chosen,
+      correct: analysis.correct,
+      swayedByTraps: analysis.swayedByTraps,
+      totalTraps: analysis.totalTraps,
+    })
+    setRevealStats(statsFromStorage())
     setPhase('reveal')
   }
 
@@ -106,12 +138,13 @@ export default function App() {
           onChoose={chooseVerdict}
         />
       )}
-      {phase === 'reveal' && verdict && (
+      {phase === 'reveal' && verdict && revealAnalysis && revealStats && (
         <RevealView
           trial={trial}
-          analysis={analyzePlay(trial, convictions, verdict)}
+          analysis={revealAnalysis}
           verdict={verdict}
           dayNumber={dayNumber}
+          stats={revealStats}
         />
       )}
     </Shell>
