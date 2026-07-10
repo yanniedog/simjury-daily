@@ -1,0 +1,8 @@
+{
+  // Cloudflare Pages config for `wrangler pages deploy`. This is a static SPA:
+  // no Workers, no bindings, no D1/KV/R2/Queues — nothing billable. See DEPLOY.md
+  // and docs/COST-GUARDRAILS.md before adding anything here.
+  "name": "simjury-daily",
+  "pages_build_output_dir": "./dist",
+  "compatibility_date": "2026-07-10"
+}

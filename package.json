@@ -13,7 +13,9 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "test": "vitest run",
-    "validate:cases": "tsx scripts/validate-cases.ts"
+    "validate:cases": "tsx scripts/validate-cases.ts",
+    "deploy": "npm run build && npx --yes wrangler pages deploy",
+    "deploy:create": "npx --yes wrangler pages project create simjury-daily --production-branch=main"
   },
   "dependencies": {
     "react": "^18.3.1",
