@@ -1,3 +1,20 @@
+> # ⚠️ Superseded — moved into `yanniedog/simjury`
+>
+> This prototype has been **absorbed into the main SimJury monorepo** and is no
+> longer developed here. Its pipeline (fiction-pinned schema, the design-quality
+> CI gate, Wordle-style daily selection, streak/calibration stats, spoiler-safe
+> shares) now lives at **[`yanniedog/simjury` → `site/app`](https://github.com/yanniedog/simjury/tree/main/site/app)**,
+> rebuilt as **The Daily Docket**: daily *2026*-relevant synthetic cases with an
+> 8–10 minute loop and an **interactive, deterministic jury room** — live at
+> **[simjury.com/today](https://simjury.com/today)**.
+>
+> The 3-minute Victorian cases and pipeline from this repo are preserved for
+> provenance under `archive/daily-v1/` in the main repo. This repository is kept
+> read-only for history and will be archived on GitHub. Everything below is the
+> original prototype README, retained as-is.
+
+---
+
 # SimJury Daily
 
 **A 3-minute verdict. One case a day. Could you have caught it?**
